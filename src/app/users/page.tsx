@@ -1,10 +1,10 @@
 "use client";
-import { getUsers } from "../../libs/userService"; // Importamos la función del servicio
+import { getUsers, deleteUser } from "../../libs/userService"; // Asegúrate de importar deleteUser
 import { useState, useEffect } from "react";
 import { User } from "@/types/user"; // Asegúrate de que la ruta sea correcta
 import Link from "next/link"; // Importar el componente Link de Next.js
 
-const Index: React.FC<{ user: User }> = ({}) => {
+const Index: React.FC<{ user: User }> = () => {
   const [users, setUsers] = useState<User[]>([]); // Definir el tipo del estado como un arreglo de User
 
   useEffect(() => {
@@ -18,6 +18,17 @@ const Index: React.FC<{ user: User }> = ({}) => {
     };
     fetchData();
   }, []);
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await deleteUser(id); // Llamamos a la función deleteUser
+      setUsers(users.filter((user) => user.id !== id)); // Actualiza el estado para eliminar el usuario
+      alert("User deleted successfully!"); // Mostrar alerta de usuario borrado
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Failed to delete user."); // Mostrar alerta si falla la eliminación
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-5">
@@ -42,11 +53,9 @@ const Index: React.FC<{ user: User }> = ({}) => {
                   Edit
                 </button>
               </Link>
+
               <button
-                onClick={() => {
-                  // Aquí puedes manejar la lógica de eliminación
-                  console.log("Delete user with ID:", u.id);
-                }}
+                onClick={() => handleDeleteUser(u.id)} // Llamar a la función handleDeleteUser
                 className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
               >
                 Delete

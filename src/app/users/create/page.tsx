@@ -1,13 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { createUser } from "../../../libs/userService"; // Importamos la función del servicio
-import Link from "next/link"; // Importar Link de Next.js
+import { useRouter } from "next/navigation"; // Importa useRouter de Next.js
+import Link from "next/link";
 
 export default function CreateUser() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter(); // Inicializa el hook useRouter
 
   // Cambiar el tipo del evento a FormEvent<HTMLFormElement>
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,6 +24,7 @@ export default function CreateUser() {
       await createUser(newUser);
       alert("User created successfully!");
       // Redirigir a la lista de usuarios después de crear el usuario
+      router.push("/users"); // Redirección a /users
     } catch (error) {
       console.error("Failed to create user:", error);
     }

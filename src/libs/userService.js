@@ -34,6 +34,7 @@ export async function createUser(userData) {
 }
 
 // Actualizar un usuario por ID
+// Actualizar un usuario por ID
 export async function updateUser(id, userData) {
   const response = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
@@ -42,19 +43,52 @@ export async function updateUser(id, userData) {
     },
     body: JSON.stringify(userData), // Enviamos los datos como JSON
   });
+
+  // Verifica si la respuesta no es exitosa
   if (!response.ok) {
-    throw new Error("Failed to update user");
+    let errorMessage = "Failed to update user";
+    try {
+      const errorResponse = await response.json(); // Extrae el cuerpo de la respuesta
+      errorMessage = errorResponse.message || errorMessage; // Usa el mensaje de error si existe
+    } catch (error) {
+      console.error("Error parsing error response:", error);
+    }
+    throw new Error(errorMessage);
   }
-  return response.json();
+
+  // Si la respuesta es 204, no hay cuerpo para analizar
+  if (response.status === 204) {
+    return; // Devuelve undefined, ya que no hay contenido
+  }
+
+  return response.json(); // En otros casos, devuelve el JSON
 }
+
+// Eliminar un usuario por ID
+// export async function deleteUser(id) {
+//   const response = await fetch(`${API_URL}/${id}`, {
+//     method: "DELETE",
+//   });
+//   if (!response.ok) {
+//     throw new Error("Failed to delete user");
+//   }
+//   return response.json();
+// }
 
 // Eliminar un usuario por ID
 export async function deleteUser(id) {
   const response = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
   });
+
   if (!response.ok) {
     throw new Error("Failed to delete user");
   }
-  return response.json();
+
+  // Si la respuesta es 204, no hay cuerpo para analizar
+  if (response.status === 204) {
+    return; // Devuelve undefined, ya que no hay contenido
+  }
+
+  return response.json(); // En otros casos, devuelve el JSON
 }

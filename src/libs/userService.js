@@ -33,7 +33,7 @@ export async function createUser(userData) {
   return response.json();
 }
 
-// Actualizar un usuario por ID
+
 // Actualizar un usuario por ID
 export async function updateUser(id, userData) {
   const response = await fetch(`${API_URL}/${id}`, {

@@ -48,7 +48,6 @@ En la vista principal (`/`), los usuarios pueden ver la lista de productos. Si u
 | `/`                 | Muestra la lista de productos sin operaciones CRUD.                |
 | `/products`         | Muestra todos los productos con opciones CRUD (si está autenticado).|
 | `/products/create`  | Permite crear un nuevo producto (requiere autenticación).           |
-| `/products/edit`    | Muestra el listado de productos para seleccionar uno a editar.     |
 | `/products/edit/{id}` | Permite editar un producto específico (requiere autenticación).    |
 
 ## Protección de Rutas

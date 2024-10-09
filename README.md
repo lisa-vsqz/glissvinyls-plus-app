@@ -73,4 +73,4 @@ Este proyecto está licenciado bajo la [MIT License](https://opensource.org/lice
 
 **Gorky Palacios Mutis**  
 Estudiante de Ingeniería de Software  
-[LinkedIn](https://linkedin.com/in/usuario)
+[LinkedIn]([https://linkedin.com/in/usuario](https://www.linkedin.com/in/gorky-palacios-mutis-8136ab230/))

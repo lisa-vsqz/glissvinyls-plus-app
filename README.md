@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GlissVinyls-Plus Web App
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-13.0-blue.svg)
+![Status](https://img.shields.io/badge/Status-In%20Development-yellowgreen.svg)
 
-First, run the development server:
+GlissVinyls-Plus es una aplicación web para la gestión de un ecommerce de vinilos. Está conectada a la API [GlissVinyls-Plus API](https://github.com/GorkyAnge/glissvinyls-plus-api) y permite a los usuarios visualizar productos, además de realizar operaciones CRUD si están autenticados.
 
+## Tabla de Contenidos
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Rutas](#rutas)
+- [Protección de Rutas](#protección-de-rutas)
+- [Contribuciones](#contribuciones)
+- [Licencia](#licencia)
+- [Autor](#autor)
+
+## Instalación
+
+Sigue estos pasos para clonar y ejecutar el proyecto en tu máquina local:
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/GorkyAnge/glissvinyls-plus-app.git
+   ```
+2. Navega al directorio del proyecto:
+```bash
+cd glissvinyls-plus-app
+```
+3. Instala las dependencias:
+```bash
+npm install
+```
+4. Inicia el servidor localmente:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+La aplicación estará disponible en http://localhost:3000.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Uso
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+En la vista principal (`/`), los usuarios pueden ver la lista de productos. Si un usuario desea realizar operaciones CRUD, debe autenticarse utilizando el botón de **Login**. Tras iniciar sesión, tendrá acceso a las rutas protegidas donde podrá crear, editar o eliminar productos.
 
-## Learn More
+## Rutas
 
-To learn more about Next.js, take a look at the following resources:
+| Ruta                | Descripción                                                        |
+|---------------------|--------------------------------------------------------------------|
+| `/`                 | Muestra la lista de productos sin operaciones CRUD.                |
+| `/products`         | Muestra todos los productos con opciones CRUD (si está autenticado).|
+| `/products/create`  | Permite crear un nuevo producto (requiere autenticación).           |
+| `/products/edit/{id}` | Permite editar un producto específico (requiere autenticación).    |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Protección de Rutas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Las rutas que permiten realizar operaciones CRUD (`/products`, `/products/create`, `/products/edit`, `/products/edit/{id}`) están protegidas por un componente que verifica si el usuario está autenticado. Si no lo está, se restringe el acceso y no podrá ver las operaciones de creación, edición o eliminación de productos.
 
-## Deploy on Vercel
+Al hacer **logout**, se eliminan los permisos de acceso y el usuario solo podrá visualizar los productos sin realizar operaciones CRUD.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contribuciones
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Las contribuciones son bienvenidas. Si deseas colaborar, sigue estos pasos:
+1. Haz un fork del proyecto.
+2. Crea una nueva rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`).
+3. Realiza tus cambios y haz un commit (`git commit -m 'Añadir nueva funcionalidad'`).
+4. Haz un push a la rama (`git push origin feature/nueva-funcionalidad`).
+5. Abre un pull request.
+
+## Licencia
+
+Este proyecto está licenciado bajo la [MIT License](https://opensource.org/licenses/MIT).
+
+## Autor
+
+**Gorky Palacios Mutis**  
+Estudiante de Ingeniería de Software  
+[LinkedIn]([https://linkedin.com/in/usuario](https://www.linkedin.com/in/gorky-palacios-mutis-8136ab230/))

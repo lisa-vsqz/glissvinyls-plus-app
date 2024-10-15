@@ -1,4 +1,5 @@
-const AUTH_API_URL = "https://localhost:7043/api/Auth"; // Ajusta la URL si es necesario
+const AUTH_API_URL =
+  "https://glissvinyls-plus-web-api.azurewebsites.net/api/Auth/"; // Ajusta la URL si es necesario
 
 export async function login(username, password) {
   const response = await fetch(`${AUTH_API_URL}/login`, {
@@ -56,6 +57,11 @@ export function logout() {
 
 // Verificar si el usuario está autenticado
 export function isAuthenticated() {
-  const token = localStorage.getItem("token");
-  return !!token; // Retorna true si existe un token, de lo contrario false
+  try {
+    const token = localStorage.getItem("token");
+    return !!token; // Retorna true si existe un token, de lo contrario false
+  } catch (error) {
+    console.error("Error al acceder a localStorage:", error);
+    return false; // Si ocurre un error, asumimos que no está autenticado
+  }
 }

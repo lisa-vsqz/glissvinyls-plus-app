@@ -1,4 +1,4 @@
-const API_URL = "https://localhost:7043/api/Users";
+const API_URL = "https://glissvinyls-plus-web-api.azurewebsites.net/api/Users";
 
 // Obtener todos los usuarios
 export async function getUsers() {
@@ -32,7 +32,6 @@ export async function createUser(userData) {
   }
   return response.json();
 }
-
 
 // Actualizar un usuario por ID
 export async function updateUser(id, userData) {

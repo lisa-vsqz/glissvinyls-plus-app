@@ -29,7 +29,7 @@ export default function CreateProduct() {
       // Redirigir a la lista de productos después de crear el producto
       router.push("/products"); // Redirección a /products
     } catch (error) {
-      setError(error.message); // Mostrar error si falla
+      setError((error as Error).message); // Mostrar error si falla
       console.error("Failed to create product:", error);
     }
   };

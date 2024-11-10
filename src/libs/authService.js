@@ -1,5 +1,4 @@
-const AUTH_API_URL =
-  "https://glissvinyls-plus-web-api.azurewebsites.net/api/Auth/"; // Ajusta la URL si es necesario
+const AUTH_API_URL = "https://localhost:7043/api/Auth"; // Ajusta la URL si es necesario
 
 export async function login(username, password) {
   const response = await fetch(`${AUTH_API_URL}/login`, {

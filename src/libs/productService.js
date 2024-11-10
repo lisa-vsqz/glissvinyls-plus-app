@@ -1,4 +1,5 @@
-const API_URL = "https://glissvinyls-plus-web-api.azurewebsites.net/Products";
+const API_URL =
+  "https://glissvinyls-plus-web-api.azurewebsites.net/api/Products";
 
 // Obtener todos los productos
 export async function getProducts() {

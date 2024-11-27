@@ -76,7 +76,7 @@ const Header = () => {
                   </Link>
 
                   <div className="hidden sm:flex">
-                    <Link href="/register">
+                    <Link href="/auth/register">
                       <button className="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600">
                         Register
                       </button>

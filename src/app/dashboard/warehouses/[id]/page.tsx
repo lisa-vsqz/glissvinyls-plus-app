@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { getWarehouseById } from "../../../../libs/warehouseService";
 import {
@@ -16,25 +16,59 @@ import { registerSale } from "../../../../libs/salesService";
 import Header from "@/components/Header";
 
 const WarehouseDetails: React.FC = () => {
-  const router = useRouter();
   const params = useParams();
   const id = params.id;
 
-  const [warehouse, setWarehouse] = useState(null);
-  const [topSellingProducts, setTopSellingProducts] = useState([]);
-  const [stockRecommendations, setStockRecommendations] = useState([]);
-  const [warehouseStock, setWarehouseStock] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  interface Warehouse {
+    warehouseName: string;
+    address: string;
+    // Add other properties as needed
+  }
+
+  const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
+  interface TopSellingProduct {
+    name: string;
+    description: string;
+    totalSold: number;
+  }
+
+  const [topSellingProducts, setTopSellingProducts] = useState<
+    TopSellingProduct[]
+  >([]);
+  interface StockRecommendation {
+    productName: string;
+    description: string;
+    predictedQuantity: number;
+  }
+
+  const [stockRecommendations, setStockRecommendations] = useState<
+    StockRecommendation[]
+  >([]);
+  const [warehouseStock, setWarehouseStock] = useState<
+    {
+      productId: number;
+      productName: string;
+      availableQuantity: number;
+      stockId: number;
+    }[]
+  >([]);
+  const [selectedProducts, setSelectedProducts] = useState<
+    { productId: number; productName: string; quantity: number }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   // Estado para manejar las cantidades ingresadas para la venta
-  const [quantityInputs, setQuantityInputs] = useState({});
+  const [quantityInputs, setQuantityInputs] = useState<{
+    [key: number]: string;
+  }>({});
 
   // Estado para manejar las cantidades ingresadas para aumentar stock
-  const [increaseQuantityInputs, setIncreaseQuantityInputs] = useState({});
+  const [increaseQuantityInputs, setIncreaseQuantityInputs] = useState<{
+    [key: number]: string;
+  }>({});
 
   // Función para manejar el cambio en el campo de entrada de cantidad para la venta
-  const handleQuantityInputChange = (productId, value) => {
+  const handleQuantityInputChange = (productId: number, value: string) => {
     setQuantityInputs((prev) => ({
       ...prev,
       [productId]: value,
@@ -42,7 +76,10 @@ const WarehouseDetails: React.FC = () => {
   };
 
   // Función para manejar el cambio en el campo de entrada de cantidad para aumentar stock
-  const handleIncreaseQuantityInputChange = (productId, value) => {
+  const handleIncreaseQuantityInputChange = (
+    productId: number,
+    value: string
+  ) => {
     setIncreaseQuantityInputs((prev) => ({
       ...prev,
       [productId]: value,
@@ -55,7 +92,7 @@ const WarehouseDetails: React.FC = () => {
         const warehouseData = await getWarehouseById(id);
         const topSelling = await getTopSellingProductsByWarehouse(id);
         const recommendations = await predictStockNeedsByWarehouse(id, 12);
-        const stock = await getStockByWarehouse(id);
+        const stock = await getStockByWarehouse(Number(id));
 
         setWarehouse(warehouseData);
         setTopSellingProducts(topSelling);
@@ -86,15 +123,20 @@ const WarehouseDetails: React.FC = () => {
       alert("¡Venta registrada exitosamente!");
       setSelectedProducts([]);
 
-      const updatedStock = await getStockByWarehouse(id);
+      const updatedStock = await getStockByWarehouse(Number(id));
       setWarehouseStock(updatedStock);
     } catch (error) {
-      console.error("Error registering sale:", error.message);
-      alert("Error al registrar la venta: " + error.message);
+      if (error instanceof Error) {
+        console.error("Error registering sale:", error.message);
+        alert("Error al registrar la venta: " + error.message);
+      } else {
+        console.error("Error registering sale:", error);
+        alert("Error al registrar la venta.");
+      }
     }
   };
 
-  const handleAddProductToSale = (productId) => {
+  const handleAddProductToSale = (productId: number) => {
     const product = warehouseStock.find((item) => item.productId === productId);
     const quantity = parseInt(quantityInputs[productId], 10);
 
@@ -143,7 +185,7 @@ const WarehouseDetails: React.FC = () => {
   };
 
   // Función para aumentar el stock
-  const handleIncreaseStock = async (stockId, productId) => {
+  const handleIncreaseStock = async (stockId: number, productId: number) => {
     const quantityToIncrease = parseInt(increaseQuantityInputs[productId], 10);
 
     if (isNaN(quantityToIncrease) || quantityToIncrease <= 0) {
@@ -156,6 +198,11 @@ const WarehouseDetails: React.FC = () => {
         (item) => item.stockId === stockId
       );
 
+      if (!currentStockItem) {
+        alert("Error: No se encontró el item de stock actual.");
+        return;
+      }
+
       const newQuantity =
         currentStockItem.availableQuantity + quantityToIncrease;
 
@@ -165,7 +212,7 @@ const WarehouseDetails: React.FC = () => {
       alert("¡Stock actualizado exitosamente!");
 
       // Actualizar el stock en el estado
-      const updatedStock = await getStockByWarehouse(id);
+      const updatedStock = await getStockByWarehouse(Number(id));
       setWarehouseStock(updatedStock);
 
       // Limpiar el campo de entrada
@@ -174,8 +221,13 @@ const WarehouseDetails: React.FC = () => {
         [productId]: "",
       }));
     } catch (error) {
-      console.error("Error updating stock quantity:", error.message);
-      alert("Error al actualizar el stock: " + error.message);
+      if (error instanceof Error) {
+        console.error("Error updating stock quantity:", error.message);
+        alert("Error al actualizar el stock: " + error.message);
+      } else {
+        console.error("Error updating stock quantity:", error);
+        alert("Error al actualizar el stock.");
+      }
     }
   };
 

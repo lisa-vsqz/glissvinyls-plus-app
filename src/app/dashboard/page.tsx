@@ -44,7 +44,6 @@ const WarehousesIndex: React.FC = () => {
   const [warehouseId, setWarehouseId] = useState<number | "">("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "entry" | "exit">("all");
-  const [error, setError] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +62,6 @@ const WarehousesIndex: React.FC = () => {
         setSuppliers(supplierData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError("Failed to load data");
       }
     };
 
@@ -80,7 +78,7 @@ const WarehousesIndex: React.FC = () => {
 
         // Sort data from most recent to oldest
         data.sort(
-          (a, b) =>
+          (a: MovementHistory, b: MovementHistory) =>
             new Date(b.movementDate).getTime() -
             new Date(a.movementDate).getTime()
         );
@@ -89,7 +87,6 @@ const WarehousesIndex: React.FC = () => {
         setCurrentPage(1); // Reset to first page when filter changes
       } catch (error) {
         console.error("Error fetching movement history:", error);
-        setError("Failed to load movement history");
       }
     };
 

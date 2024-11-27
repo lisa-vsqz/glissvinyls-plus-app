@@ -60,8 +60,12 @@ const Register = () => {
       await register(newUser);
       alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
       router.push("/auth/login");
-    } catch (err: any) {
-      setError(err.message || "Error al registrar el usuario.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Error al registrar el usuario.");
+      } else {
+        setError("Error al registrar el usuario.");
+      }
       console.error("Failed to register:", err);
     } finally {
       setIsLoading(false);

@@ -33,8 +33,12 @@ const CreateWarehouse: React.FC = () => {
       await createWarehouse(newWarehouse);
       alert("¡Almacén creado exitosamente!");
       router.push("/dashboard"); // Redirige a la lista de almacenes
-    } catch (err: any) {
-      setError(err.message || "Error al crear el almacén.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Error al crear el almacén.");
+      } else {
+        setError("Error al crear el almacén.");
+      }
       console.error("Failed to create warehouse:", err);
     }
   };

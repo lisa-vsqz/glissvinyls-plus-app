@@ -1,26 +1,30 @@
-"use client"; // Asegúrate de que este archivo sea un componente de cliente
+"use client";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // Importa desde 'next/navigation' en Next.js 13 y superior
-import { getProductById, updateProduct } from "../../../../libs/productService"; // Asegúrate de que la ruta sea correcta
-import { Product } from "@/types/product"; // Importa la interfaz Product desde el archivo de tipos
+import { useRouter, useParams } from "next/navigation";
+import { getProductById, updateProduct } from "../../../../libs/productService";
+import { Product } from "@/types/product";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-export default function EditProduct({ params }: { params: { id: string } }) {
+export default function EditProduct() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id;
+
   const [product, setProduct] = useState<Product>({
-    id: "", // Asegúrate de incluir el campo 'id' en el estado inicial
+    productId: "",
     name: "",
     description: "",
     price: 0,
     stock: 0,
     image: "",
+    categoryId: "",
   });
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (params.id) {
+      if (id) {
         try {
-          const fetchedProduct = await getProductById(params.id); // Asegúrate de que la función obtenga el producto por ID
+          const fetchedProduct = await getProductById(id);
           setProduct(fetchedProduct);
         } catch (error) {
           console.error("Failed to fetch product:", error);
@@ -29,21 +33,17 @@ export default function EditProduct({ params }: { params: { id: string } }) {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Intentar actualizar el producto
-      await updateProduct(product.id, product);
-
-      // Si no se lanza ninguna excepción, se considera exitoso
-      alert("Product updated successfully!"); // Alerta de éxito
-      router.push("/products"); // Redirigir a la lista de productos después de la actualización
+      await updateProduct(product.productId, product);
+      alert("Product updated successfully!");
+      router.push("/products");
     } catch (error) {
       console.error("Failed to update product:", error);
-      // Mostrar un mensaje de error más detallado
-      alert(`Failed to update product: ${(error as Error).message}`); // Alerta de error
+      alert(`Failed to update product: ${(error as Error).message}`);
       router.push("/products");
     }
   };

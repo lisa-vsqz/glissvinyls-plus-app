@@ -1,5 +1,4 @@
-const AUTH_API_URL =
-  "https://glissvinyls-plus-web-api.azurewebsites.net/api/Auth"; // Ajusta la URL si es necesario
+import { AUTH_API_URL } from "../config/config";
 
 export async function login(username, password) {
   const response = await fetch(`${AUTH_API_URL}/login`, {
@@ -26,6 +25,38 @@ export async function login(username, password) {
   // Almacenar el token en localStorage
   localStorage.setItem("token", data.token);
 
+  return data;
+}
+
+export async function register(userData) {
+  const response = await fetch(`${AUTH_API_URL}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: 0, // Según tu esquema, aunque generalmente el backend asigna el ID
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      username: userData.username,
+      password: userData.password,
+      role: userData.role,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = "Failed to register";
+    try {
+      const errorResponse = await response.json();
+      errorMessage = errorResponse.message || errorMessage;
+    } catch (error) {
+      console.error("Error parsing error response:", error);
+    }
+    throw new Error(errorMessage);
+  }
+
+  const data = await response.json();
   return data;
 }
 

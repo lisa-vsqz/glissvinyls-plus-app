@@ -26,7 +26,7 @@ const Index: React.FC = () => {
   const handleDeleteProduct = async (id: string) => {
     try {
       await deleteProduct(id); // Llamar a la función para eliminar el producto
-      setProducts(products.filter((product) => product.id !== id)); // Actualizar la lista de productos
+      setProducts(products.filter((product) => product.productId !== id)); // Actualizar la lista de productos
       alert("Product deleted successfully!"); // Mostrar alerta de eliminación exitosa
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -62,7 +62,7 @@ const Index: React.FC = () => {
         <ul className="w-full max-w-md">
           {products.map((p) => (
             <li
-              key={p.id}
+              key={p.productId}
               className="border p-4 my-2 rounded bg-white shadow-md flex justify-between items-center"
             >
               <span>
@@ -71,7 +71,7 @@ const Index: React.FC = () => {
               </span>
               <div className="flex space-x-2">
                 {/* Botón de editar */}
-                <Link href={`/products/edit/${p.id}`}>
+                <Link href={`/products/edit/${p.productId}`}>
                   <button className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
                     Edit
                   </button>
@@ -79,7 +79,7 @@ const Index: React.FC = () => {
 
                 {/* Botón de eliminar */}
                 <button
-                  onClick={() => handleDeleteProduct(p.id)} // Llamar a la función handleDeleteProduct
+                  onClick={() => handleDeleteProduct(p.productId)} // Llamar a la función handleDeleteProduct
                   className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
                 >
                   Delete

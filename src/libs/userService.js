@@ -1,8 +1,8 @@
-const API_URL = "https://localhost:7043/api/Users";
+import { API_BASE_URL } from "../config/config";
 
 // Obtener todos los usuarios
 export async function getUsers() {
-  const response = await fetch(API_URL);
+  const response = await fetch(API_BASE_URL);
   if (!response.ok) {
     throw new Error("Failed to fetch users");
   }
@@ -11,7 +11,7 @@ export async function getUsers() {
 
 // Obtener un usuario por ID
 export async function getUserById(id) {
-  const response = await fetch(`${API_URL}/${id}`);
+  const response = await fetch(`${API_BASE_URL}/${id}`);
   if (!response.ok) {
     throw new Error("Failed to fetch user");
   }
@@ -20,7 +20,7 @@ export async function getUserById(id) {
 
 // Crear un nuevo usuario
 export async function createUser(userData) {
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export async function createUser(userData) {
 
 // Actualizar un usuario por ID
 export async function updateUser(id, userData) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export async function updateUser(id, userData) {
 
 // Eliminar un usuario por ID
 export async function deleteUser(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "DELETE",
   });
 

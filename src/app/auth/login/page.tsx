@@ -16,7 +16,7 @@ const Login = () => {
 
     try {
       await login(username, password); // Llamamos la función login con username y password
-      router.push("/products"); // Redirige al dashboard o a la ruta deseada
+      router.push("/dashboard"); // Redirige al dashboard o a la ruta deseada
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

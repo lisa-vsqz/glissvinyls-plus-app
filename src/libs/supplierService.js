@@ -1,8 +1,8 @@
-const API_URL = "https://localhost:7043/api/Suppliers";
+import { SUPPLIER_API_URL } from "../config/config";
 
 // Get all suppliers
 export async function getSuppliers() {
-  const response = await fetch(API_URL);
+  const response = await fetch(SUPPLIER_API_URL);
   if (!response.ok) {
     throw new Error("Failed to fetch suppliers");
   }
@@ -11,7 +11,7 @@ export async function getSuppliers() {
 
 // Get a supplier by ID (Admin only)
 export async function getSupplierById(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${SUPPLIER_API_URL}/${id}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`, // Token for Admin
     },
@@ -24,7 +24,7 @@ export async function getSupplierById(id) {
 
 // Create a new supplier (Admin only)
 export async function createSupplier(supplier) {
-  const response = await fetch(API_URL, {
+  const response = await fetch(SUPPLIER_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export async function createSupplier(supplier) {
 
 // Update a supplier by ID (Admin only)
 export async function updateSupplier(id, supplierData) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${SUPPLIER_API_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export async function updateSupplier(id, supplierData) {
 
 // Delete a supplier by ID (Admin only)
 export async function deleteSupplier(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${SUPPLIER_API_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,

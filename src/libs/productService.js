@@ -1,9 +1,8 @@
-const API_URL =
-  "https://glissvinyls-plus-web-api.azurewebsites.net/api/Products";
+import { PRODUCT_API_URL } from "../config/config";
 
 // Obtener todos los productos
 export async function getProducts() {
-  const response = await fetch(API_URL);
+  const response = await fetch(PRODUCT_API_URL);
   if (!response.ok) {
     throw new Error("Failed to fetch products");
   }
@@ -12,17 +11,33 @@ export async function getProducts() {
 
 // Obtener un producto por ID
 export async function getProductById(id) {
-  const response = await fetch(`${API_URL}/${id}`);
+  const token = localStorage.getItem("token"); // Obtener el token del almacenamiento local
+
+  const response = await fetch(`${PRODUCT_API_URL}/${id}`, {
+    method: "GET", // El método GET es implícito, pero es bueno ser explícito
+    headers: {
+      Authorization: `Bearer ${token}`, // Incluye el token en las cabeceras
+    },
+  });
+
   if (!response.ok) {
-    throw new Error("Failed to fetch product");
+    let errorMessage = "Failed to fetch product";
+    try {
+      const errorResponse = await response.json(); // Intenta obtener el cuerpo del error
+      errorMessage = errorResponse.message || errorMessage;
+    } catch (error) {
+      console.error("Error parsing error response:", error);
+    }
+    throw new Error(errorMessage); // Lanza un error con el mensaje adecuado
   }
-  return response.json();
+
+  return response.json(); // Devuelve el producto obtenido
 }
 
 export async function createProduct(product) {
   const token = localStorage.getItem("token"); // Obtener el token de localStorage
 
-  const response = await fetch(API_URL, {
+  const response = await fetch(PRODUCT_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -46,7 +61,7 @@ export async function createProduct(product) {
 }
 
 export async function updateProduct(id, productData) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${PRODUCT_API_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -76,7 +91,7 @@ export async function updateProduct(id, productData) {
 }
 
 export async function deleteProduct(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${PRODUCT_API_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`, // Incluye el token JWT si es necesario

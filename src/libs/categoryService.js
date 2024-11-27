@@ -1,8 +1,21 @@
-const API_URL = "https://localhost:7043/api/Categories";
+import { CATEGORY_API_URL } from "../config/config";
+
+const login = async (credentials) => {
+  const response = await fetch(`${CATEGORY_API_URL}/login`, {
+    method: "POST",
+    body: JSON.stringify(credentials),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+};
+
+export default login;
 
 // Get all categories
 export async function getCategories() {
-  const response = await fetch(API_URL);
+  const response = await fetch(CATEGORY_API_URL);
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
   }
@@ -11,7 +24,7 @@ export async function getCategories() {
 
 // Get a category by ID
 export async function getCategoryById(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${CATEGORY_API_URL}/${id}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`, // Token for Admin
     },
@@ -24,7 +37,7 @@ export async function getCategoryById(id) {
 
 // Create a new category (Admin only)
 export async function createCategory(category) {
-  const response = await fetch(API_URL, {
+  const response = await fetch(CATEGORY_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,7 +61,7 @@ export async function createCategory(category) {
 }
 
 export async function updateCategory(id, categoryData) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${CATEGORY_API_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +80,7 @@ export async function updateCategory(id, categoryData) {
 
 // Delete a category by ID (Admin only)
 export async function deleteCategory(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${CATEGORY_API_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,

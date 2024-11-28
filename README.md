@@ -43,22 +43,6 @@ En la vista principal (`/`), los usuarios pueden ver la lista de productos. Si u
 
 ---
 
-## Rutas
-
-| **Ruta**                       | **Descripción**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/`                            | Muestra la lista de productos registrados en la empresa sin operaciones CRUD.                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/auth/login`                  | Muestra la pantalla de inicio de sesión para que los usuarios puedan autenticarse.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `/auth/register`               | Muestra la pantalla de registro para que nuevos usuarios puedan crear una cuenta.                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/products`                    | Muestra todos los productos con opciones CRUD (disponible si el usuario está autenticado).                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/products/create`             | Permite crear un nuevo producto (requiere autenticación).                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/products/edit/{id}`          | Permite editar un producto específico (requiere autenticación).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/dashboard`                   | Muestra la lista de almacenes (warehouses) de la empresa, el historial de inventario que incluye todas las entradas y salidas de productos de todos los almacenes. Además, presenta un panel para filtrar productos por un rango de fechas y mostrar una tabla con los productos de mayor rotación (más entradas y salidas). También incluye un botón para adquirir productos, donde se pueden seleccionar Supplier, Warehouse, Category, y añadir detalles como Nombre del Producto, Descripción, Precio, Cantidad e Imagen. Los productos se añaden a una lista para su adquisición. |
-| `/dashboard/warehouse/{id}`    | Muestra los detalles de un almacén específico, incluyendo los productos más vendidos, recomendaciones de stock, y detalles del stock (nombres de los productos y su cantidad disponible). Además, ofrece acciones para gestionar el stock, como añadir productos a la venta (salidas de stock) y aumentar el stock disponible (entradas de stock).                                                                                                                           |
-| `/dashboard/warehouses/create` | Permite crear nuevos almacenes ingresando su nombre y dirección.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-
----
-
 ### Detalles Adicionales
 
 - **Adquirir Productos en Dashboard:**
@@ -75,9 +59,9 @@ Los productos añadidos a través de este proceso se agregan a una lista para su
 
 ---
 
-### Organización de Rutas por Sección (Opcional)
+### Organización de Rutas por Sección
 
-Para una mejor organización, puedes categorizar las rutas según su funcionalidad. A continuación, un ejemplo de cómo hacerlo:
+
 
 #### **Autenticación**
 

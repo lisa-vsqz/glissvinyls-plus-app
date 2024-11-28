@@ -41,14 +41,70 @@ La aplicación estará disponible en http://localhost:3000.
 
 En la vista principal (`/`), los usuarios pueden ver la lista de productos. Si un usuario desea realizar operaciones CRUD, debe autenticarse utilizando el botón de **Login**. Tras iniciar sesión, tendrá acceso a las rutas protegidas donde podrá crear, editar o eliminar productos.
 
+---
+
 ## Rutas
 
-| Ruta                | Descripción                                                        |
-|---------------------|--------------------------------------------------------------------|
-| `/`                 | Muestra la lista de productos sin operaciones CRUD.                |
-| `/products`         | Muestra todos los productos con opciones CRUD (si está autenticado).|
-| `/products/create`  | Permite crear un nuevo producto (requiere autenticación).           |
-| `/products/edit/{id}` | Permite editar un producto específico (requiere autenticación).    |
+| **Ruta**                       | **Descripción**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/`                            | Muestra la lista de productos registrados en la empresa sin operaciones CRUD.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/auth/login`                  | Muestra la pantalla de inicio de sesión para que los usuarios puedan autenticarse.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/auth/register`               | Muestra la pantalla de registro para que nuevos usuarios puedan crear una cuenta.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/products`                    | Muestra todos los productos con opciones CRUD (disponible si el usuario está autenticado).                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/products/create`             | Permite crear un nuevo producto (requiere autenticación).                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `/products/edit/{id}`          | Permite editar un producto específico (requiere autenticación).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/dashboard`                   | Muestra la lista de almacenes (warehouses) de la empresa, el historial de inventario que incluye todas las entradas y salidas de productos de todos los almacenes. Además, presenta un panel para filtrar productos por un rango de fechas y mostrar una tabla con los productos de mayor rotación (más entradas y salidas). También incluye un botón para adquirir productos, donde se pueden seleccionar Supplier, Warehouse, Category, y añadir detalles como Nombre del Producto, Descripción, Precio, Cantidad e Imagen. Los productos se añaden a una lista para su adquisición. |
+| `/dashboard/warehouse/{id}`    | Muestra los detalles de un almacén específico, incluyendo los productos más vendidos, recomendaciones de stock, y detalles del stock (nombres de los productos y su cantidad disponible). Además, ofrece acciones para gestionar el stock, como añadir productos a la venta (salidas de stock) y aumentar el stock disponible (entradas de stock).                                                                                                                           |
+| `/dashboard/warehouses/create` | Permite crear nuevos almacenes ingresando su nombre y dirección.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+---
+
+### Detalles Adicionales
+
+- **Adquirir Productos en Dashboard:**
+  - **Select Supplier:** Selecciona el proveedor de los productos.
+  - **Select Warehouse:** Selecciona el almacén donde se almacenarán los productos.
+  - **Select Category:** Selecciona la categoría del producto.
+  - **Product Name:** Ingresa el nombre del producto.
+  - **Description:** Proporciona una descripción del producto.
+  - **Price:** Establece el precio del producto.
+  - **Quantity:** Define la cantidad del producto a adquirir.
+  - **Image URL:** Proporciona la URL de la imagen del producto.
+
+Los productos añadidos a través de este proceso se agregan a una lista para su adquisición posterior.
+
+---
+
+### Organización de Rutas por Sección (Opcional)
+
+Para una mejor organización, puedes categorizar las rutas según su funcionalidad. A continuación, un ejemplo de cómo hacerlo:
+
+#### **Autenticación**
+
+| **Ruta**         | **Descripción**                      |
+|------------------|--------------------------------------|
+| `/auth/login`    | Pantalla de inicio de sesión.        |
+| `/auth/register` | Pantalla de registro de nuevos usuarios. |
+
+#### **Productos**
+
+| **Ruta**               | **Descripción**                                                        |
+|------------------------|------------------------------------------------------------------------|
+| `/products`            | Lista todos los productos con opciones CRUD (si está autenticado).     |
+| `/products/create`     | Permite crear un nuevo producto (requiere autenticación).              |
+| `/products/edit/{id}`  | Permite editar un producto específico (requiere autenticación).        |
+
+#### **Dashboard**
+
+| **Ruta**                       | **Descripción**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/dashboard`                   | Vista principal del dashboard que muestra almacenes, historial de inventario, filtrado por fechas, productos de mayor rotación y opción para adquirir productos.                                                                                                                                                                                                                                                                                                                                         |
+| `/dashboard/warehouse/{id}`    | Detalles específicos de un almacén, incluyendo productos más vendidos, recomendaciones y gestión de stock.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `/dashboard/warehouses/create` | Permite crear nuevos almacenes ingresando su nombre y dirección.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+---
+
+
 
 ## Protección de Rutas
 

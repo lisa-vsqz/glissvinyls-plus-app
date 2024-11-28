@@ -64,3 +64,16 @@ export async function getExitHistoryByWarehouse(warehouseId) {
   }
   return response.json();
 }
+
+// Obtener productos con mayor rotación en un rango de fechas
+export async function getTopRotatedProducts(startDate, endDate) {
+  const response = await fetch(
+    `${MOVEMENT_HISTORY_API_URL}/TopRotatedProducts?startDate=${startDate}&endDate=${endDate}`
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch top rotated products between ${startDate} and ${endDate}`
+    );
+  }
+  return response.json();
+}

@@ -11,11 +11,13 @@ import {
   getAllMovementHistory,
   getEntryHistory,
   getExitHistory,
+  getTopRotatedProducts, // Asegúrate de importar el nuevo servicio
 } from "../../libs/movementHistoryService";
 import { Warehouse } from "@/types/warehouse";
 import { Category } from "@/types/category";
 import { Supplier } from "@/types/supplier";
 import { MovementHistory } from "@/types/MovementHistory";
+import { TopRotatedProduct } from "@/types/TopRotatedProduct"; // Define este tipo
 
 interface Product {
   name: string;
@@ -27,6 +29,7 @@ interface Product {
 }
 
 const WarehousesIndex: React.FC = () => {
+  // Estados existentes
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -45,10 +48,18 @@ const WarehousesIndex: React.FC = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "entry" | "exit">("all");
 
-  // Pagination state
+  // Nuevos estados para el panel de productos más rotados
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [topRotatedProducts, setTopRotatedProducts] = useState<
+    TopRotatedProduct[]
+  >([]);
+
+  // Estado para la paginación
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Efecto para cargar almacenes, categorías y proveedores
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,6 +79,7 @@ const WarehousesIndex: React.FC = () => {
     fetchData();
   }, []);
 
+  // Efecto para cargar el historial de movimientos según el filtro
   useEffect(() => {
     const fetchMovementHistory = async () => {
       try {
@@ -76,7 +88,7 @@ const WarehousesIndex: React.FC = () => {
         else if (filter === "entry") data = await getEntryHistory();
         else if (filter === "exit") data = await getExitHistory();
 
-        // Sort data from most recent to oldest
+        // Ordenar los datos de más recientes a más antiguos
         data.sort(
           (a: MovementHistory, b: MovementHistory) =>
             new Date(b.movementDate).getTime() -
@@ -84,7 +96,7 @@ const WarehousesIndex: React.FC = () => {
         );
 
         setMovementHistory(data);
-        setCurrentPage(1); // Reset to first page when filter changes
+        setCurrentPage(1); // Reiniciar a la primera página cuando cambia el filtro
       } catch (error) {
         console.error("Error fetching movement history:", error);
       }
@@ -93,6 +105,7 @@ const WarehousesIndex: React.FC = () => {
     fetchMovementHistory();
   }, [filter]);
 
+  // Funciones para manejar productos
   const handleAddProduct = () => {
     // Validaciones básicas
     if (
@@ -154,7 +167,23 @@ const WarehousesIndex: React.FC = () => {
     }
   };
 
-  // Pagination calculations
+  // Función para manejar la búsqueda de productos más rotados
+  const handleFetchTopRotatedProducts = async () => {
+    if (!startDate || !endDate) {
+      alert("Por favor, selecciona ambas fechas.");
+      return;
+    }
+
+    try {
+      const products = await getTopRotatedProducts(startDate, endDate);
+      setTopRotatedProducts(products);
+    } catch (error) {
+      console.error("Error fetching top rotated products:", error);
+      alert("Error al obtener los productos más rotados.");
+    }
+  };
+
+  // Cálculos para la paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = movementHistory.slice(indexOfFirstItem, indexOfLastItem);
@@ -172,7 +201,85 @@ const WarehousesIndex: React.FC = () => {
               Create Warehouse
             </button>
           </Link>
-          <ul>
+
+          {/* Panel para productos más rotados */}
+          <div className="bg-white p-4 rounded shadow-md mt-6">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Top Rotated Products
+            </h3>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <label className="block font-bold mb-1">Start Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-1">End Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={handleFetchTopRotatedProducts}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Resultados de productos más rotados */}
+            {topRotatedProducts.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-md font-bold mb-2">Results:</h4>
+                <table className="table-auto w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-200 text-gray-700">
+                      <th className="border border-gray-300 px-4 py-2">
+                        Product
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2">
+                        Entries
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2">
+                        Exits
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2">
+                        Total Movements
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topRotatedProducts.map((product) => (
+                      <tr key={product.productId}>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {product.productName}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {product.entryMovements}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {product.exitMovements}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {product.totalMovements}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Lista de Almacenes */}
+          <ul className="mt-6">
             {warehouses.map((w) => (
               <li
                 key={w.warehouseId}
@@ -189,6 +296,8 @@ const WarehousesIndex: React.FC = () => {
               </li>
             ))}
           </ul>
+
+          {/* Botón para abrir el popup de adquisición de productos */}
           <div className="mt-6">
             <button
               onClick={() => setIsPopupOpen(true)}
@@ -199,7 +308,7 @@ const WarehousesIndex: React.FC = () => {
           </div>
         </div>
 
-        {/* Popup for Product Acquisition */}
+        {/* Popup para Adquisición de Productos */}
         {isPopupOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center overflow-auto z-50">
             <div className="bg-white p-6 rounded shadow-lg w-11/12 md:w-3/4 lg:w-1/2 z-50">
@@ -263,7 +372,7 @@ const WarehousesIndex: React.FC = () => {
                   ))}
                 </select>
               </div>
-              {/* Other Product Fields */}
+              {/* Otros Campos del Producto */}
               <div className="mb-4">
                 <label className="block font-bold mb-1">Product Name</label>
                 <input
@@ -392,6 +501,7 @@ const WarehousesIndex: React.FC = () => {
             <h2 className="text-2xl font-bold text-center mb-4">
               Movement History Dashboard
             </h2>
+            {/* Botones de Filtrado */}
             <div className="flex justify-center space-x-4 mb-6">
               <button
                 onClick={() => setFilter("all")}
@@ -424,6 +534,7 @@ const WarehousesIndex: React.FC = () => {
                 Exits
               </button>
             </div>
+            {/* Tabla de Historial de Movimientos */}
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-200 text-gray-700">
@@ -447,7 +558,7 @@ const WarehousesIndex: React.FC = () => {
                     </td>
                     <td
                       className={`border border-gray-300 px-4 py-2 ${
-                        movement.movementType === "Entry"
+                        movement.movementType.toLowerCase() === "entry"
                           ? "text-green-600"
                           : "text-red-600"
                       }`}
@@ -465,7 +576,7 @@ const WarehousesIndex: React.FC = () => {
               </tbody>
             </table>
 
-            {/* Pagination Controls */}
+            {/* Controles de Paginación */}
             {movementHistory.length > itemsPerPage && (
               <div className="flex justify-center space-x-2 mt-4">
                 <button

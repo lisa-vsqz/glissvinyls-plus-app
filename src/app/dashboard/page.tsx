@@ -16,8 +16,15 @@ import {
 import { Warehouse } from "@/types/warehouse";
 import { Category } from "@/types/category";
 import { Supplier } from "@/types/supplier";
-import { MovementHistory } from "@/types/MovementHistory";
-import { TopRotatedProduct } from "@/types/TopRotatedProduct"; // Define este tipo
+import { MovementHistory } from "@/types/MovementHistory"; // Define este tipo
+
+interface TopRotatedProduct {
+  productId: number;
+  productName: string;
+  entryMovements: number;
+  exitMovements: number;
+  totalMovements: number;
+}
 
 interface Product {
   name: string;

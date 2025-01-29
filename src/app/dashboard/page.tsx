@@ -11,12 +11,15 @@ import {
   getAllMovementHistory,
   getEntryHistory,
   getExitHistory,
-  getTopRotatedProducts, // Asegúrate de importar el nuevo servicio
+  getTopRotatedProducts,
 } from "../../libs/movementHistoryService";
 import { Warehouse } from "@/types/warehouse";
 import { Category } from "@/types/category";
 import { Supplier } from "@/types/supplier";
-import { MovementHistory } from "@/types/MovementHistory"; // Define este tipo
+import { MovementHistory } from "@/types/MovementHistory";
+
+// Importamos las funciones de xlsx
+import { utils, writeFile } from "xlsx";
 
 interface TopRotatedProduct {
   productId: number;
@@ -36,12 +39,35 @@ interface Product {
 }
 
 const WarehousesIndex: React.FC = () => {
-  // Estados existentes
+  // ===================== Estados generales =====================
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+
+  // ===================== Historial de movimientos =====================
+  // 1) Estado con los datos crudos (según el endpoint que llamemos)
+  const [rawMovementHistory, setRawMovementHistory] = useState<
+    MovementHistory[]
+  >([]);
+
+  // 2) Estado con los datos filtrados en el front
+  const [filteredMovementHistory, setFilteredMovementHistory] = useState<
+    MovementHistory[]
+  >([]);
+
+  // ===================== Filtro por tipo de movimiento =====================
+  const [filterType, setFilterType] = useState<"all" | "entry" | "exit">("all");
+
+  // ===================== Filtros de almacén y producto (SIN fechas) =====================
+  const [filterWarehouseId, setFilterWarehouseId] = useState<number | "">("");
+  const [filterProductName, setFilterProductName] = useState<string>("");
+
+  // ===================== Paginación =====================
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // ===================== Estados para adquirir productos =====================
   const [products, setProducts] = useState<Product[]>([]);
-  const [movementHistory, setMovementHistory] = useState<MovementHistory[]>([]);
   const [newProduct, setNewProduct] = useState<Product>({
     name: "",
     description: "",
@@ -53,20 +79,15 @@ const WarehousesIndex: React.FC = () => {
   const [supplierId, setSupplierId] = useState<number | "">("");
   const [warehouseId, setWarehouseId] = useState<number | "">("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [filter, setFilter] = useState<"all" | "entry" | "exit">("all");
 
-  // Nuevos estados para el panel de productos más rotados
+  // ===================== Estados para productos más rotados =====================
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [topRotatedProducts, setTopRotatedProducts] = useState<
     TopRotatedProduct[]
   >([]);
 
-  // Estado para la paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Efecto para cargar almacenes, categorías y proveedores
+  // ===================== useEffect: cargar almacenes, categorías, proveedores =====================
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -86,35 +107,69 @@ const WarehousesIndex: React.FC = () => {
     fetchData();
   }, []);
 
-  // Efecto para cargar el historial de movimientos según el filtro
+  // ===================== useEffect: traer datos según el filtro de tipo (all, entry, exit) =====================
   useEffect(() => {
     const fetchMovementHistory = async () => {
       try {
-        let data;
-        if (filter === "all") data = await getAllMovementHistory();
-        else if (filter === "entry") data = await getEntryHistory();
-        else if (filter === "exit") data = await getExitHistory();
+        let data: MovementHistory[] = [];
+        if (filterType === "all") data = await getAllMovementHistory();
+        else if (filterType === "entry") data = await getEntryHistory();
+        else if (filterType === "exit") data = await getExitHistory();
 
         // Ordenar los datos de más recientes a más antiguos
         data.sort(
-          (a: MovementHistory, b: MovementHistory) =>
+          (a, b) =>
             new Date(b.movementDate).getTime() -
             new Date(a.movementDate).getTime()
         );
 
-        setMovementHistory(data);
-        setCurrentPage(1); // Reiniciar a la primera página cuando cambia el filtro
+        // Guardamos en rawMovementHistory
+        setRawMovementHistory(data);
+        setCurrentPage(1);
       } catch (error) {
         console.error("Error fetching movement history:", error);
       }
     };
 
     fetchMovementHistory();
-  }, [filter]);
+  }, [filterType]);
 
-  // Funciones para manejar productos
+  // ===================== useEffect: filtrar en el front-end por almacén y producto (SIN fechas) =====================
+  useEffect(() => {
+    // Copiamos los datos crudos
+    let data = [...rawMovementHistory];
+
+    // 1) Filtrar por almacén
+    if (filterWarehouseId !== "") {
+      data = data.filter(
+        (movement) => movement.warehouseId === Number(filterWarehouseId)
+      );
+    }
+
+    // 2) Filtrar por nombre de producto
+    if (filterProductName.trim() !== "") {
+      const lowerSearch = filterProductName.toLowerCase();
+      data = data.filter((movement) =>
+        movement.productName.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    // Finalmente, seteamos el estado filtrado
+    setFilteredMovementHistory(data);
+    setCurrentPage(1); // opcional: reiniciar paginación cuando cambien filtros
+  }, [rawMovementHistory, filterWarehouseId, filterProductName]);
+
+  // ===================== Lógica de paginación (usa filteredMovementHistory) =====================
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredMovementHistory.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredMovementHistory.length / itemsPerPage);
+
+  // ===================== Funciones para adquirir productos =====================
   const handleAddProduct = () => {
-    // Validaciones básicas
     if (
       !newProduct.name ||
       !newProduct.description ||
@@ -174,7 +229,7 @@ const WarehousesIndex: React.FC = () => {
     }
   };
 
-  // Función para manejar la búsqueda de productos más rotados
+  // ===================== Panel de productos más rotados =====================
   const handleFetchTopRotatedProducts = async () => {
     if (!startDate || !endDate) {
       alert("Por favor, selecciona ambas fechas.");
@@ -190,17 +245,41 @@ const WarehousesIndex: React.FC = () => {
     }
   };
 
-  // Cálculos para la paginación
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = movementHistory.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(movementHistory.length / itemsPerPage);
+  // ===================== Exportar a Excel =====================
+  const handleExportToExcel = () => {
+    if (topRotatedProducts.length === 0) {
+      alert("No hay datos para exportar.");
+      return;
+    }
 
+    // Encabezados de las columnas
+    const headers = ["Product", "Entries", "Exits", "Total Movements"];
+
+    // Convertimos los datos en un Array of Arrays (AOA)
+    const data = topRotatedProducts.map((product) => [
+      product.productName,
+      product.entryMovements,
+      product.exitMovements,
+      product.totalMovements,
+    ]);
+
+    // Creamos una hoja de trabajo a partir de los datos
+    const worksheet = utils.aoa_to_sheet([headers, ...data]);
+
+    // Creamos un libro de trabajo y le agregamos la hoja
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, "TopRotatedProducts");
+
+    // Exportamos el archivo
+    writeFile(workbook, "TopRotatedProducts.xlsx");
+  };
+
+  // ===================== Render =====================
   return (
     <ProtectedRoute>
       <Header />
       <div className="flex flex-row h-screen bg-gray-100">
-        {/* Left Side: Warehouses */}
+        {/* ===================== Lado Izquierdo ===================== */}
         <div className="w-1/3 p-4 border-r border-gray-300 overflow-y-auto">
           <h2 className="text-2xl font-bold text-center mb-4">Warehouses</h2>
           <Link href="dashboard/warehouses/create">
@@ -245,6 +324,14 @@ const WarehousesIndex: React.FC = () => {
             {topRotatedProducts.length > 0 && (
               <div className="mt-6">
                 <h4 className="text-md font-bold mb-2">Results:</h4>
+
+                <button
+                  onClick={handleExportToExcel}
+                  className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                >
+                  Exportar a Excel
+                </button>
+
                 <table className="table-auto w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-gray-200 text-gray-700">
@@ -315,7 +402,7 @@ const WarehousesIndex: React.FC = () => {
           </div>
         </div>
 
-        {/* Popup para Adquisición de Productos */}
+        {/* ===================== Popup para Adquisición de Productos ===================== */}
         {isPopupOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center overflow-auto z-50">
             <div className="bg-white p-6 rounded shadow-lg w-11/12 md:w-3/4 lg:w-1/2 z-50">
@@ -502,18 +589,19 @@ const WarehousesIndex: React.FC = () => {
           </div>
         )}
 
-        {/* Right Side: Movement History Dashboard */}
+        {/* ===================== Lado Derecho: Movement History Dashboard ===================== */}
         <div className="w-2/3 p-4 overflow-y-auto">
           <div className="bg-white p-6 rounded shadow-md">
             <h2 className="text-2xl font-bold text-center mb-4">
               Movement History Dashboard
             </h2>
-            {/* Botones de Filtrado */}
+
+            {/* ======== Botones de Filtrado por Tipo (sin fechas) ======== */}
             <div className="flex justify-center space-x-4 mb-6">
               <button
-                onClick={() => setFilter("all")}
+                onClick={() => setFilterType("all")}
                 className={`px-4 py-2 rounded ${
-                  filter === "all"
+                  filterType === "all"
                     ? "bg-teal-600 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
@@ -521,9 +609,9 @@ const WarehousesIndex: React.FC = () => {
                 All Movements
               </button>
               <button
-                onClick={() => setFilter("entry")}
+                onClick={() => setFilterType("entry")}
                 className={`px-4 py-2 rounded ${
-                  filter === "entry"
+                  filterType === "entry"
                     ? "bg-green-600 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
@@ -531,9 +619,9 @@ const WarehousesIndex: React.FC = () => {
                 Entries
               </button>
               <button
-                onClick={() => setFilter("exit")}
+                onClick={() => setFilterType("exit")}
                 className={`px-4 py-2 rounded ${
-                  filter === "exit"
+                  filterType === "exit"
                     ? "bg-red-600 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
@@ -541,7 +629,48 @@ const WarehousesIndex: React.FC = () => {
                 Exits
               </button>
             </div>
-            {/* Tabla de Historial de Movimientos */}
+
+            {/* ======== Filtros (solo almacén y producto) ======== */}
+            <div className="p-4 mb-4 bg-gray-50 border border-gray-200 rounded">
+              <h3 className="font-bold mb-2">Filtros adicionales</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* FILTRO DE ALMACÉN */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1">
+                    Almacén
+                  </label>
+                  <select
+                    value={filterWarehouseId}
+                    onChange={(e) =>
+                      setFilterWarehouseId(Number(e.target.value) || "")
+                    }
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="">-- Todos --</option>
+                    {warehouses.map((w) => (
+                      <option key={w.warehouseId} value={w.warehouseId}>
+                        {w.warehouseName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* FILTRO DE PRODUCTO (POR NOMBRE) */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1">
+                    Producto
+                  </label>
+                  <input
+                    type="text"
+                    value={filterProductName}
+                    onChange={(e) => setFilterProductName(e.target.value)}
+                    placeholder="Nombre del producto..."
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ======== Tabla de Historial de Movimientos (filtered) ======== */}
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-200 text-gray-700">
@@ -583,8 +712,8 @@ const WarehousesIndex: React.FC = () => {
               </tbody>
             </table>
 
-            {/* Controles de Paginación */}
-            {movementHistory.length > itemsPerPage && (
+            {/* ======== Controles de Paginación ======== */}
+            {filteredMovementHistory.length > itemsPerPage && (
               <div className="flex justify-center space-x-2 mt-4">
                 <button
                   onClick={() =>

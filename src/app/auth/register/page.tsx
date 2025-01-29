@@ -14,20 +14,16 @@ const Register = () => {
   const [email, setEmail] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<string>("User"); // Valor predeterminado: "User"
+  const [role] = useState<string>("Admin"); // Rol fijo en "Admin"
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
-
-  const handleToggleRole = () => {
-    setRole((prevRole) => (prevRole === "User" ? "Admin" : "User"));
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null); // Limpiar errores previos
 
-    // Validaciones básicas
+    // Validaciones básicas de campos
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -39,10 +35,19 @@ const Register = () => {
       return;
     }
 
-    // Validación de formato de email (opcional pero recomendado)
+    // Validación de formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Por favor, introduce un email válido.");
+      return;
+    }
+
+    // Validación de contraseña (mínimo 8 caracteres, un número, una mayúscula y un caracter especial)
+    const passwordRegex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[^A-Za-z0-9])(?=.{8,})/;
+    if (!passwordRegex.test(password)) {
+      setError(
+        "La contraseña debe tener al menos 8 caracteres, un número, una mayúscula y un caracter especial."
+      );
       return;
     }
 
@@ -52,7 +57,7 @@ const Register = () => {
       email: email.trim(),
       username: username.trim(),
       password: password.trim(),
-      role, // "User" o "Admin"
+      role, // Siempre "Admin"
     };
 
     try {
@@ -170,37 +175,6 @@ const Register = () => {
                   className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-              </div>
-
-              {/* Toggle Switch para Seleccionar Rol */}
-              <div className="flex items-center">
-                <label className="mr-4 text-sm font-medium">Role:</label>
-                <label
-                  htmlFor="role-toggle"
-                  className="flex items-center cursor-pointer"
-                >
-                  {/* Toggle */}
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      id="role-toggle"
-                      className="sr-only"
-                      checked={role === "Admin"}
-                      onChange={handleToggleRole}
-                    />
-                    <div className="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
-                    <div
-                      className={`absolute w-6 h-6 bg-white rounded-full shadow -left-1 -top-1 transition-transform ${
-                        role === "Admin"
-                          ? "transform translate-x-full bg-green-500"
-                          : ""
-                      }`}
-                    ></div>
-                  </div>
-                  <div className="ml-3 text-sm font-medium text-gray-700">
-                    {role}
-                  </div>
-                </label>
               </div>
 
               <button

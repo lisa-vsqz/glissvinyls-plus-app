@@ -1,29 +1,67 @@
-// pages/warehouses/create.tsx
-
 "use client";
 
-import React, { useState } from "react";
-import { createWarehouse } from "../../../../libs/warehouseService";
+import React, { useState, useEffect } from "react";
+import {
+  createWarehouse,
+  getWarehouses,
+} from "../../../../libs/warehouseService";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Header from "@/components/Header";
 
+// Asume que Warehouse es un tipo que tienes definido así:
+// interface Warehouse {
+//   warehouseId: number;
+//   warehouseName: string;
+//   address: string;
+// }
+
 const CreateWarehouse: React.FC = () => {
   const [warehouseName, setWarehouseName] = useState("");
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Para almacenar la lista de almacenes existentes
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+
   const router = useRouter();
+
+  // Al montar el componente, traemos la lista de almacenes
+  useEffect(() => {
+    async function fetchWarehouses() {
+      try {
+        const data = await getWarehouses();
+        setWarehouses(data);
+      } catch (err) {
+        console.error("Error al obtener los almacenes:", err);
+      }
+    }
+    fetchWarehouses();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
 
-    // Validaciones básicas
+    // Validaciones básicas en frontend
     if (!warehouseName.trim() || !address.trim()) {
       setError("Por favor, completa todos los campos.");
       return;
     }
 
+    // 1. Verificamos si el nombre ya existe en la lista de almacenes
+    const nombreDuplicado = warehouses.some(
+      (wh) =>
+        wh.warehouseName.toLowerCase() === warehouseName.trim().toLowerCase()
+    );
+
+    if (nombreDuplicado) {
+      setError("Ya existe un almacén con este nombre. Por favor, elige otro.");
+      return;
+    }
+
+    // 2. Si el nombre no está duplicado, construimos el objeto
     const newWarehouse = {
       warehouseName: warehouseName.trim(),
       address: address.trim(),
@@ -32,14 +70,15 @@ const CreateWarehouse: React.FC = () => {
     try {
       await createWarehouse(newWarehouse);
       alert("¡Almacén creado exitosamente!");
-      router.push("/dashboard"); // Redirige a la lista de almacenes
+      // Redirige a la lista de almacenes (o a donde tú prefieras)
+      router.push("/dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Error al crear el almacén.");
       } else {
         setError("Error al crear el almacén.");
       }
-      console.error("Failed to create warehouse:", err);
+      console.error("Fallo al crear el almacén:", err);
     }
   };
 
@@ -51,6 +90,7 @@ const CreateWarehouse: React.FC = () => {
           Crear Nuevo Almacén
         </h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4"
@@ -82,6 +122,7 @@ const CreateWarehouse: React.FC = () => {
             Crear Almacén
           </button>
         </form>
+
         <Link href="/dashboard" className="mt-4">
           <button className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">
             Volver

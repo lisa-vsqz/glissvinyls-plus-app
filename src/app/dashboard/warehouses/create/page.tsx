@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Header from "@/components/Header";
+import { Warehouse } from "@/types/warehouse";
 
 // Asume que Warehouse es un tipo que tienes definido así:
 // interface Warehouse {

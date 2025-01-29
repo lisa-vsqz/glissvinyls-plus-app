@@ -109,6 +109,7 @@ const Login = () => {
             <h1 className="text-2xl font-bold">Login</h1>
 
             {error && <p className="text-red-500">{error}</p>}
+            <p>Failed attempts: {failedAttempts}</p>
             {lockUntil && Date.now() < lockUntil && (
               <p className="text-red-500">
                 Bloqueado por intentos fallidos. Reintenta en {timeLeft} seg.
@@ -123,7 +124,7 @@ const Login = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full rounded-lg border-gray-200 p-4 pr-12 text-sm shadow-sm"
-                  disabled={lockUntil && Date.now() < lockUntil}
+                  disabled={!!(lockUntil && Date.now() < lockUntil)}
                   required
                 />
               </div>
@@ -135,7 +136,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-lg border-gray-200 p-4 pr-12 text-sm shadow-sm"
-                  disabled={lockUntil && Date.now() < lockUntil}
+                  disabled={!!(lockUntil && Date.now() < lockUntil)}
                   required
                 />
               </div>
@@ -143,7 +144,7 @@ const Login = () => {
               <button
                 type="submit"
                 className="w-full rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white"
-                disabled={lockUntil && Date.now() < lockUntil}
+                disabled={!!(lockUntil && Date.now() < lockUntil)}
               >
                 Log In
               </button>

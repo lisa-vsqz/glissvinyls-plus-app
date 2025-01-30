@@ -26,10 +26,19 @@ const CreateWarehouse: React.FC = () => {
 
   // Para almacenar la lista de almacenes existentes
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  const [isTutorialActive, setIsTutorialActive] = useState(false);
 
   const router = useRouter();
 
-  const isTutorialActive = localStorage.getItem("tutorialStep") === "activado";
+  useEffect(() => {
+    setIsClient(true);
+
+    if (typeof window !== "undefined") {
+      const tutorialStep = localStorage.getItem("tutorialStep");
+      setIsTutorialActive(tutorialStep === "activado");
+    }
+  }, []);
 
   const startTutorial = () => {
     const driverObj = driver({
@@ -132,6 +141,10 @@ const CreateWarehouse: React.FC = () => {
       console.error("Fallo al crear el almacén:", err);
     }
   };
+
+  if (!isClient) {
+    return null; // Or a loading indicator if preferred
+  }
 
   return (
     <ProtectedRoute>

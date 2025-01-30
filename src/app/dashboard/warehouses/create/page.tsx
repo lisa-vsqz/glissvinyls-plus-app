@@ -10,6 +10,7 @@ import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Header from "@/components/Header";
 import { Warehouse } from "@/types/warehouse";
+import { driver } from "driver.js";
 
 // Asume que Warehouse es un tipo que tienes definido así:
 // interface Warehouse {
@@ -28,6 +29,49 @@ const CreateWarehouse: React.FC = () => {
 
   const router = useRouter();
 
+  const isTutorialActive = localStorage.getItem("tutorialStep") === "activado";
+
+  const startTutorial = () => {
+    const driverObj = driver({
+      showProgress: true,
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "xd", // Top Rotated Products Panel
+          popover: {
+            title: "Agrega un nuevo almacén",
+            description: "Aquí puedes agregar un nuevo almacén",
+          },
+        },
+        {
+          element: "#CreateWarehouseForm",
+          popover: {
+            title: "Datos de tu almacén",
+            description: "Ingresa los datos de tu nuevo almacén",
+          },
+        },
+        {
+          element: "#CreateWarehouse",
+          popover: {
+            title: "Crear almacén",
+            description: "Has clic aquí para crear un nuevo almacén",
+            onNextClick: () => {
+              localStorage.setItem("tutorialStep", "createWarehouse");
+              router.push("/dashboard"); // Navigate back to the dashboard
+            },
+          },
+        },
+        {
+          element: "jiji",
+          popover: {},
+        },
+      ],
+      onDestroyed: () => {},
+    });
+
+    driverObj.drive();
+  };
+
   // Al montar el componente, traemos la lista de almacenes
   useEffect(() => {
     async function fetchWarehouses() {
@@ -40,6 +84,12 @@ const CreateWarehouse: React.FC = () => {
     }
     fetchWarehouses();
   }, []);
+
+  useEffect(() => {
+    if (isTutorialActive) {
+      startTutorial();
+    }
+  }, [isTutorialActive]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,6 +143,7 @@ const CreateWarehouse: React.FC = () => {
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
         <form
+          id="CreateWarehouseForm"
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4"
         >
@@ -117,6 +168,7 @@ const CreateWarehouse: React.FC = () => {
             />
           </div>
           <button
+            id="CreateWarehouse"
             type="submit"
             className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
           >

@@ -17,6 +17,9 @@ import { Warehouse } from "@/types/warehouse";
 import { Category } from "@/types/category";
 import { Supplier } from "@/types/supplier";
 import { MovementHistory } from "@/types/MovementHistory";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Importamos las funciones de xlsx
 import { utils, writeFile } from "xlsx";
@@ -86,6 +89,17 @@ const WarehousesIndex: React.FC = () => {
   const [topRotatedProducts, setTopRotatedProducts] = useState<
     TopRotatedProduct[]
   >([]);
+
+  // ===================== useEffect: quickstart =====================
+  const searchParams = useSearchParams();
+  const startTutorial = searchParams.get("startTutorial");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (startTutorial) {
+      quickStart();
+    }
+  }, [startTutorial]);
 
   // ===================== useEffect: cargar almacenes, categorías, proveedores =====================
   useEffect(() => {
@@ -274,6 +288,148 @@ const WarehousesIndex: React.FC = () => {
     writeFile(workbook, "TopRotatedProducts.xlsx");
   };
 
+  // ===================== Funciones para el tour virtual =====================
+  const quickStart = () => {
+    const driverObj = driver({
+      showProgress: true,
+      steps: [
+        {
+          element: ".example1", // Change this selector to match an actual element
+          popover: {
+            title: "Bienvenidooo!",
+            description:
+              "Este es tú sistema de gestión de almacenes. ¡Hagamos un recorrido rápido!",
+          },
+        },
+        {
+          element: "#CreateWarehouse", // Create Warehouse button
+          popover: {
+            title: "Crea tu almacén",
+            description:
+              "Has clic aquí para crear un nuevo almacén para la gestión de inventario",
+            onNextClick: () => {
+              localStorage.setItem("tutorialStep", "activado");
+              router.push("/dashboard/warehouses/create");
+            },
+          },
+        },
+        {
+          element: "div.bg-white.p-4", // Top Rotated Products Panel
+          popover: {
+            title: "Productos de mayor rotación",
+            description: "Vea los productos más movidos en sus almacenes.",
+          },
+        },
+      ],
+      onDestroyed: () => {
+        router.replace("/dashboard");
+      },
+    });
+
+    driverObj.drive();
+  };
+
+  useEffect(() => {
+    const step = localStorage.getItem("tutorialStep");
+
+    if (step === "createWarehouse") {
+      // Start the next step of the tutorial
+      startNextTutorialStep();
+      localStorage.removeItem("tutorialStep"); // Clean up the flag
+    }
+  }, []);
+
+  const startNextTutorialStep = () => {
+    const driverObj = driver({
+      showProgress: true,
+      steps: [
+        {
+          element: "xd", // Top Rotated Products Panel
+          popover: {
+            title: "Continuemos",
+            description: "Sigamos con el tutorial...",
+          },
+        },
+        {
+          element: "div.bg-white.p-4", // Top Rotated Products Panel
+          popover: {
+            title: "Productos de mayor rotación",
+            description: "Vea los productos más movidos en sus almacenes.",
+          },
+        },
+        {
+          element: "#StartDate", // Date filters for rotated products
+          popover: {
+            title: "Filtro por fecha",
+            description:
+              "Elija un rango de fechas para analizar el movimiento del producto. Escoge la fecha de inicio.",
+          },
+        },
+        {
+          element: "#EndDate", // Date filters for rotated products
+          popover: {
+            title: "Filtro por fecha",
+            description:
+              "Elija un rango de fechas para analizar el movimiento del producto. Escoge la fecha de fin.",
+          },
+        },
+        {
+          element: "button.bg-blue-600", // Search button
+          popover: {
+            title: "Busca tus mejores productos",
+            description:
+              "Haga clic para obtener resultados de los productos más destacados",
+          },
+        },
+        {
+          element: "table.table-auto", // Table displaying top rotated products
+          popover: {
+            title: "Movimiento de productos",
+            description:
+              "Esta tabla muestra el movimiento de productos que entran y salen de los almacenes.",
+          },
+        },
+        {
+          element: "#FiltradoTipo", // Table displaying top rotated products
+          popover: {
+            title: "Filtra tus productos",
+            description:
+              "Selecciona si deseas ver solo entradas, solo salidas de productos o ambos.",
+          },
+        },
+        {
+          element: "#FiltroAlmaProd", // Table displaying top rotated products
+          popover: {
+            title: "Filtra por nombres",
+            description:
+              "También puedes filtrar buscando el nombre de un almacén o por el nombre del producto.",
+          },
+        },
+        {
+          element: "ul.mt-6", // List of warehouses
+          popover: {
+            title: "Lista de almacenes",
+            description:
+              "Aquí se enumeran todos sus almacenes. Haga clic en Manage para ver los detalles",
+          },
+        },
+        {
+          element: "button.w-full.bg-blue-600", // Acquire Products button
+          popover: {
+            title: "Adquiera nuevos productos",
+            description:
+              "Haga clic aquí para agregar productos a sus almacenes",
+          },
+        },
+      ],
+      onDestroyed: () => {
+        router.replace("/dashboard");
+      },
+    });
+
+    driverObj.drive();
+  };
+
   // ===================== Render =====================
   return (
     <ProtectedRoute>
@@ -283,7 +439,10 @@ const WarehousesIndex: React.FC = () => {
         <div className="w-1/3 p-4 border-r border-gray-300 overflow-y-auto">
           <h2 className="text-2xl font-bold text-center mb-4">Warehouses</h2>
           <Link href="dashboard/warehouses/create">
-            <button className="mb-4 px-4 py-2 bg-teal-600 text-white rounded hover:bg-blue-600 transition w-full">
+            <button
+              id="CreateWarehouse"
+              className="mb-4 px-4 py-2 bg-teal-600 text-white rounded hover:bg-blue-600 transition w-full"
+            >
               Create Warehouse
             </button>
           </Link>
@@ -297,6 +456,7 @@ const WarehousesIndex: React.FC = () => {
               <div>
                 <label className="block font-bold mb-1">Start Date</label>
                 <input
+                  id="StartDate"
                   type="date"
                   className="w-full p-2 border rounded"
                   value={startDate}
@@ -306,6 +466,7 @@ const WarehousesIndex: React.FC = () => {
               <div>
                 <label className="block font-bold mb-1">End Date</label>
                 <input
+                  id="EndDate"
                   type="date"
                   className="w-full p-2 border rounded"
                   value={endDate}
@@ -597,7 +758,10 @@ const WarehousesIndex: React.FC = () => {
             </h2>
 
             {/* ======== Botones de Filtrado por Tipo (sin fechas) ======== */}
-            <div className="flex justify-center space-x-4 mb-6">
+            <div
+              id="FiltradoTipo"
+              className="flex justify-center space-x-4 mb-6"
+            >
               <button
                 onClick={() => setFilterType("all")}
                 className={`px-4 py-2 rounded ${
@@ -631,7 +795,10 @@ const WarehousesIndex: React.FC = () => {
             </div>
 
             {/* ======== Filtros (solo almacén y producto) ======== */}
-            <div className="p-4 mb-4 bg-gray-50 border border-gray-200 rounded">
+            <div
+              id="FiltroAlmaProd"
+              className="p-4 mb-4 bg-gray-50 border border-gray-200 rounded"
+            >
               <h3 className="font-bold mb-2">Filtros adicionales</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* FILTRO DE ALMACÉN */}

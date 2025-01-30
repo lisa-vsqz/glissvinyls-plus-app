@@ -1,8 +1,11 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { isAuthenticated, logout } from "../libs/authService";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
   const [auth, setAuth] = useState(false);
 
   useEffect(() => {
@@ -25,6 +28,10 @@ const Header = () => {
     logout();
     setAuth(false); // Actualizar el estado de autenticación
     window.location.href = "/"; // Redirigir al usuario después de cerrar sesión
+  };
+
+  const startTutorial = () => {
+    router.replace("/dashboard?startTutorial=true");
   };
 
   return (
@@ -70,12 +77,20 @@ const Header = () => {
                   </div>
                 </>
               ) : (
-                <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow"
-                >
-                  Logout
-                </button>
+                <div>
+                  <button
+                    onClick={startTutorial}
+                    className="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow mr-4"
+                  >
+                    Quickstart
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow"
+                  >
+                    Logout
+                  </button>
+                </div>
               )}
             </div>
           </div>

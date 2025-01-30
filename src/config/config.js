@@ -1,4 +1,5 @@
-export const API_BASE_URL = "https://localhost:7043/api";
+export const API_BASE_URL =
+  "https://glissvinyls-plus20250129211840.azurewebsites.net/api";
 
 export const AUTH_API_URL = `${API_BASE_URL}/Auth`;
 export const CATEGORY_API_URL = `${API_BASE_URL}/Categories`;
